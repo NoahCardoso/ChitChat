@@ -2,10 +2,10 @@ import asyncHandler from "express-async-handler";
 import db from "../config/db.js";
 import bcrypt from "bcrypt";
 
+
 const saltRounds = 10;
 
-
-const registerUser = asyncHandler(async (req, res) => {
+export const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password, pic } = req.body;
 
   // Input validation
@@ -44,32 +44,33 @@ const registerUser = asyncHandler(async (req, res) => {
 });
 
 //auth
-const authUser = asyncHandler(async(req, res) => {
+
+export const allUsers = asyncHandler(async (req, res) => {
   
-	const {email, password} = req.body;
-	if (!email || !password) {
-		res.status(400);
-		throw new Error("Please enter all the fields");
-	}
+  const search = req.query.search;
+  const currentUserId = req.user?.id;
 
-	// Check if user already exists
-	const result = await db.query("SELECT * FROM users WHERE email = $1", [email]);
-	if(result.rows){
-		const user = result.rows[0];
-    const isMatch = await bcrypt.compare(password, user.password);
-		if(user && isMatch){
-			res.json({
-				id: user.id,
-				name: user.name,
-				email: user.email,
-				pic: user.pic,
+  try {
+    let users;
 
-			})
-		} else {
-			res.status(401);
-			throw new Error("Invalid Email or Password");
-		}
-	} 
+    if (search) {
+      const keyword = `%${search}%`;
+      users = await db.query(
+        `SELECT * FROM users WHERE (name ILIKE $1 OR email ILIKE $1) AND id != $2`,
+        [keyword, currentUserId || -1]
+      );
+    } else {
+      users = await db.query(
+        `SELECT * FROM users WHERE id != $1`,
+        [currentUserId || -1]
+      );
+    }
+
+    res.json(users.rows);
+  } catch (err) {
+    console.error("Error fetching users:", err);
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
 });
 
-export default {registerUser, authUser};
+
