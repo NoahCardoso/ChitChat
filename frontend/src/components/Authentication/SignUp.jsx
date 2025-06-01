@@ -9,8 +9,9 @@ const SignUp = () => {
 	const [email, setEmail] = useState();
 	const [confirmPassword, setConfirmPassword] = useState();
 	const [password, setPassword] = useState();
-	const [picture, setPicture] = useState();
+	const [pic, setPic] = useState();
 	const [loading, setLoading] = useState(false);
+	
 	const toast = useToast();
 	const history = useHistory();
 
@@ -18,9 +19,9 @@ const SignUp = () => {
 		setShow(!show);
 	};
 
-	const postDetails = (picture) => {
+	const postDetails = (pic) => {
 		setLoading(true);
-		if (picture === undefined) {
+		if (pic === undefined) {
 			toast({
 				title: "Please Select an Image!",
 				status: "warning",
@@ -31,21 +32,21 @@ const SignUp = () => {
 			return;
 		}
 		
-		if(picture.type==="image/jpeg" || picture.type === "image/png"){
+		if(pic.type==="image/jpeg" || pic.type === "image/png"){
 			const data = new FormData();
-			data.append("file", picture);
+			data.append("file", pic);
 			data.append("upload_preset", "chat-app");
 			data.append("cloud_name", "dynt0ciad");
 			fetch("https://api.cloudinary.com/v1_1/dynt0ciad/upload", {
 				method:"post",
 				body: data,
 			}).then((res) => res.json()).then(data => {
-				setPicture(data.url.toString());
+				setPic(data.url.toString());
 				setLoading(false);
 			}).catch((err) => {
 				console.log(err);
 				setLoading(false);
-			})
+			});
 
 		}
 		else {
@@ -91,7 +92,7 @@ const SignUp = () => {
 					"Content-type": "application/json",
 				},
 			};
-			const {data} = await axios.post("/api/user",{name,email,password,picture}, config);
+			const {data} = await axios.post("/api/user",{name,email,password,pic}, config);
 			toast({
 				title: "Registration Successful",
 				status: "success",
@@ -153,7 +154,7 @@ const SignUp = () => {
 		</InputGroup>
 		</FormControl>
 
-		<FormControl id="picture" isRequired>
+		<FormControl id="pic" isRequired>
 		<FormLabel>Upload your Picture</FormLabel>
 
 			<Input type="file" p={1.5} accept="image/*"

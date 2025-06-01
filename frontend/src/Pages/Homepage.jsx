@@ -1,13 +1,21 @@
-import React from "react"
+import React, { useEffect } from "react"
+import {useHistory} from "react-router-dom";
 import Login from "../components/Authentication/Login"
 import SignUp from "../components/Authentication/SignUp"
 import { Container, Box, Text, Tab, Tabs, TabList, TabPanel, TabPanels } from "@chakra-ui/react"
 
 const Homepage = () => {
+	const history = useHistory();
+	useEffect(() => {
+		const user = JSON.parse(localStorage.getItem("userInfo"));
+		if(user){
+			history.push("/chats");
+		}
+	}, [history]);
   return (
 	<Container maxW="xl" centerContent>
 		<Box 
-		d="flex"
+		display="flex"
 		justifyContent="center"
 		p={3}
 		bg={"white"}
@@ -16,7 +24,7 @@ const Homepage = () => {
 		borderRadius="lg"
 		borderWidth="1px"
 		>
-			<Text fontSize="4xl" fontFamily="Work sans" color="black">NameHERE</Text>
+			<Text fontSize="4xl" fontFamily="work sans" color="black">LinkUp</Text>
 		</Box>
 		<Box bg="White" w="100%" p ={4} borderRadius="lg" borderWidth="1px">
 			<Tabs variant="enclosed">
