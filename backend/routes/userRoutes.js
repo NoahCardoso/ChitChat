@@ -1,5 +1,6 @@
 import express from "express";
 import {registerUser, allUsers} from "../controllers/userControllers.js";
+import {ensureAuthenticated} from "../middleware/authMiddleware.js"
 import passport from "passport";
 
 const router = express.Router();
