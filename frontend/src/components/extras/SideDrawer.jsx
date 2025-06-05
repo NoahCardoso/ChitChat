@@ -22,7 +22,7 @@ const SideDrawer = () => {
 	const [loadingChat, setLoadingChat] = useState();
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const {user} = ChatState();
-	console.log(user);
+
 	const history = useHistory();
 	const logoutHandler = () => {
 		localStorage.removeItem("userInfo");
@@ -44,7 +44,13 @@ const SideDrawer = () => {
 		}
 		try {
 			setLoading(true);
-			const {data} = await axios.get("/api/user?search="+search)
+			const { data } = await axios.get(`/api/user?search=${search}`, {
+				withCredentials: true,
+			});
+			setSearchResult(data);
+			setLoading(false);
+			
+			onClose()
 		} catch(err) {
 			toast({
 				title: "Error Occured!",
@@ -54,6 +60,7 @@ const SideDrawer = () => {
 				isClosable: true,
 				position: "bottom-left",
 			});
+			console.log(err);
 		}
 	};
 

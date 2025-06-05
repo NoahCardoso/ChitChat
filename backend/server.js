@@ -8,7 +8,7 @@ import errorMiddleware from "./middleware/errorMiddleware.js";
 import authMiddleware from "./middleware/authMiddleware.js";
 import session from "express-session";
 import passport from "passport";
-
+import cors from "cors";
 const app = express();
 const port = process.env.PORT || 5000;
 db.connect();
@@ -25,6 +25,11 @@ app.use(
 app.use(authMiddleware.initializePassport(db));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(cors({
+  origin: process.env.FRONTEND_PORT,
+  credentials: true,
+}));
+
 app.get("/api/chats", (req,res) => {
 	res.json(chats);
 });
