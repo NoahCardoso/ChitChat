@@ -24,7 +24,7 @@ const Homepage = () => {
 		borderRadius="lg"
 		borderWidth="1px"
 		>
-			<Text fontSize="4xl" fontFamily="work sans" color="black">LinkUp</Text>
+			<Text fontSize="4xl" fontFamily="work sans" color="black">ChitChat</Text>
 		</Box>
 		<Box bg="White" w="100%" p ={4} borderRadius="lg" borderWidth="1px">
 			<Tabs variant="enclosed">

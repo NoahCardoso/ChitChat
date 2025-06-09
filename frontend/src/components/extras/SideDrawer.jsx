@@ -116,7 +116,7 @@ const SideDrawer = () => {
 		</Tooltip>
 
 		<Text fontSize="2xl" fontFamily="Work sans">
-			LinkUp
+			ChitChat
 		</Text>
 		
 		<div>
