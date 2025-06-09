@@ -26,7 +26,7 @@ export const accessChat = asyncHandler(async(req,res) => {
     res.send(possibleChats.rows[0]);
   } else {
     const newChat = await db.query("INSERT INTO chats (chatname, isgroupchat, groupadmin) VALUES ($1, $2, $3) RETURNING *",["sender",false,req.user.id]);
-    const newChatId = newChatId.rows[0].id;
+    const newChatId = newChat.rows[0].id;
     if(newChatId){
       await db.query("INSERT INTO chat_users (chat_id, user_id) VALUES ($1, $2)",[newChatId,req.user.id]);
       await db.query("INSERT INTO chat_users (chat_id, user_id) VALUES ($1, $2)",[newChatId,userId]);
