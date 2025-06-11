@@ -90,7 +90,7 @@ const MyChats = () => {
         key={chat.id}
       >
         <Text>
-          {!chat.isGroupChat?(getSender(loggedzUser, chat.users)):(chat.chatName)}
+          {!chat.isgroupchat?(getSender(loggedzUser, chat.users)):(chat.chatname)}
         </Text>
       </Box>))}</Stack>) : (<ChatLoading/>)}
     </Box>
