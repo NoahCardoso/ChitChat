@@ -95,7 +95,7 @@ const GroupChatModal = ({children}) => {
         duration: 5000,
         isClosable: true,
         position: "top",
-      })
+      });
       return;
     }
     setSelectedUsers([...selectedUsers, userToAdd])
