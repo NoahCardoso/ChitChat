@@ -1,9 +1,10 @@
 import { ViewIcon } from "@chakra-ui/icons";
-import { Button, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useDisclosure, Modal, ModalBody, ModalCloseButton, IconButton, useToast, Box, FormControl, Input } from "@chakra-ui/react";
+import { Button, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useDisclosure, Modal, ModalBody, ModalCloseButton, IconButton, useToast, Box, FormControl, Input, Spinner } from "@chakra-ui/react";
 import React, { useState } from 'react'
 import { ChatState } from "../../Context/ChatProvider";
 import UserBadgeItem from "../UserAvatar/UserBadgeItem";
 import axios from "axios";
+import UserListItem from "../UserAvatar/UserListItem";
 
 const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
   const  { isOpen, onOpen, onClose} = useDisclosure();
@@ -46,7 +47,67 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
 
   };
 
-  const handleSearch = () => {};
+  const handleSearch = async(query) => {
+    setSearch(query);
+		if (!query) {
+			return;
+		}
+		try {
+			setLoading(true);
+			const { data } = await axios.get(`/api/user?search=${search}`, {
+				withCredentials: true,
+			});
+			setSearchResult(data);
+			setLoading(false);
+			
+			
+		} catch(err) {
+			toast({
+				title: "Error Occured!",
+				description: "Failed to load the Search Results",
+				status: "error",
+				duration: 5000,
+				isClosable: true,
+				position: "bottom-left",
+			});
+		}
+	};
+
+  const handleAddUser = async (otherUser) => {
+    if (selectedChat.users.find(u => u.id === otherUser.id)) {
+      toast({
+        title: "User Already in group!",
+				status: "error",
+				duration: 5000,
+				isClosable: true,
+				position: "bottom",
+      });
+      return;
+    }
+
+    if (selectedChat.groupAdmin.id !== user.id) {
+      toast({
+        title: "Only admins can add someone!",
+				status: "error",
+				duration: 5000,
+				isClosable: true,
+				position: "bottom",
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+			const { data } = await axios.put(`/api/chat/group-add`, {chatId: selectedChat.id, userId: otherUser.id}, {
+				withCredentials: true,
+			});
+			setSelectedChat(data);
+      setFetchAgain(!fetchAgain);
+			setLoading(false);
+    } catch (error) {
+      
+    }
+  };
 
   return (
     <>
@@ -100,6 +161,7 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
                 onChange={(e) => handleSearch(e.target.value)}
               />
             </FormControl>
+            {loading ? (<Spinner size="lg"/>) : (searchResult?.map((user) => (<UserListItem key={user.id} user={user} handleFunction={() => handleAddUser(user)}/>)))}
           </ModalBody>
           <ModalBody>
           </ModalBody>

@@ -33,8 +33,9 @@ const SideDrawer = () => {
 
 	const toast = useToast();
 
-	const handleSearch= async() => {
-		if (!search) {
+	const handleSearch= async(query) => {
+		setSearch(query);
+		if (!query) {
 			toast({
 				title: "Please Fill all the Feilds!",
 				status: "warning",
