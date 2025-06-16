@@ -44,6 +44,7 @@ export const fetchChats = asyncHandler(async(req,res) => {
   c.id AS chat_id,
   c.chatname,
   c.isgroupchat,
+  c.groupadmin,
   c.updated_at,
   u.id AS user_id,
   u.name,
@@ -63,6 +64,7 @@ export const fetchChats = asyncHandler(async(req,res) => {
         id: chatId,
         chatname: row.chatname,
         isgroupchat: row.isgroupchat,
+        groupadmin: row.groupadmin,
         updated_at: row.updated_at,
         users: [],
       };
@@ -128,7 +130,7 @@ export const renameGroup = asyncHandler(async(req, res) => {
       [chatId]
     );
   res.status(200).json({
-      ...chat,
+      chat: chat[0],
       users: userResult.rows,
     });
 });
@@ -145,7 +147,7 @@ export const addToGroup = asyncHandler(async (req, res) => {
       [chatId]
     );
   res.status(200).json({
-      ...chat,
+      chat: chat[0],
       users: userResult.rows,
     });
 });
@@ -162,7 +164,7 @@ export const removeFromGroup = asyncHandler(async (req, res) => {
       [chatId]
     );
   res.status(200).json({
-      ...chat,
+      chat: chat[0],
       users: userResult.rows,
     });
 });

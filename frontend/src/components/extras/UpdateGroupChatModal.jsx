@@ -18,7 +18,36 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
 
   const { selectedChat, setSelectedChat, user} = ChatState();
 
-  const handleRemove = () => {};
+  const handleRemove = async(otherUser) => {
+    if (selectedChat.groupadmin !== user.id && otherUser.id !== user.id) {
+      toast({
+        title: "Only admins can remove someone!",
+				status: "error",
+				duration: 5000,
+				isClosable: true,
+				position: "bottom",
+      });
+      return;
+    }
+    try {
+      setLoading(true);
+      const {data} = await axios.put("/api/chat/group-remove",{chatId: selectedChat.id, userId: otherUser.id,}, {withCredentials: true});
+      otherUser.id === user.id ? setSelectedChat() : setSelectedChat(data);
+      setFetchAgain(!fetchAgain);
+      setLoading(false);
+    } catch (error) {
+      toast({
+				title: "Error Occured!",
+				description: error.response.data.message,
+				status: "error",
+				duration: 5000,
+				isClosable: true,
+				position: "bottom",
+			});
+      setLoading(false);
+    }
+
+  };
 
   const handleRename = async () => {
     if(!groupChatName) return;
@@ -71,6 +100,7 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
 				position: "bottom-left",
 			});
 		}
+    setLoading(false);
 	};
 
   const handleAddUser = async (otherUser) => {
@@ -85,7 +115,7 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
       return;
     }
 
-    if (selectedChat.groupAdmin.id !== user.id) {
+    if (selectedChat.groupadmin !== user.id) {
       toast({
         title: "Only admins can add someone!",
 				status: "error",
