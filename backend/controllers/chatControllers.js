@@ -45,6 +45,8 @@ export const fetchChats = asyncHandler(async(req,res) => {
   c.chatname,
   c.isgroupchat,
   c.groupadmin,
+  c.latestmessage,
+  c.sender,
   c.updated_at,
   u.id AS user_id,
   u.name,
@@ -65,6 +67,8 @@ export const fetchChats = asyncHandler(async(req,res) => {
         chatname: row.chatname,
         isgroupchat: row.isgroupchat,
         groupadmin: row.groupadmin,
+        latestmessage: row.latestmessage,
+        sender: row.sender,
         updated_at: row.updated_at,
         users: [],
       };

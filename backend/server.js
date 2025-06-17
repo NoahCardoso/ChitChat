@@ -4,6 +4,7 @@ import chats from "./data/data.js";
 import db from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js";
 import errorMiddleware from "./middleware/errorMiddleware.js";
 import authMiddleware from "./middleware/authMiddleware.js";
 import session from "express-session";
@@ -42,6 +43,7 @@ app.get("/api/chats/:id", (req,res) => {
 
 app.use("/api/user",userRoutes);
 app.use("/api/chat",chatRoutes);
+app.use("/api/message",messageRoutes);
 
 app.use(errorMiddleware.notFound);
 app.use(errorMiddleware.errorHandler);
