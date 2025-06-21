@@ -7,7 +7,7 @@ import ProfileModal from "./extras/ProfileModal";
 import UpdateGroupChatModal from "./extras/UpdateGroupChatModal";
 import axios from "axios";
 import "./styles.css";
-
+import ScrollableChat from "./ScrollableChat";
 
 const SingleChat = ({ fetchAgain, setFetchAgain}) => {
 
@@ -114,7 +114,11 @@ const SingleChat = ({ fetchAgain, setFetchAgain}) => {
       borderRadius="lg"
       overflowY="hidden"
     >
-      {loading ? (<Spinner size="xl" w={20} h={20} alignSelf="center" margin="auto"/>) : (<div className="messages"></div>)}
+      {loading ? (<Spinner size="xl" w={20} h={20} alignSelf="center" margin="auto"/>) : (
+        <div className="messages">
+          <ScrollableChat messages={messages}/>
+        </div>
+      )}
       <FormControl onKeyDown={sendMessage} isRequired mt={3}>
         <Input variant="filled" bg="#E0E0E0" placeholder="Enter a message.." onChange={typingHandler} value={newMessage}/>
       </FormControl>

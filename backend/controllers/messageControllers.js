@@ -38,7 +38,16 @@ export const sendMessage = asyncHandler(async (req, res) => {
 
 export const allMessages = asyncHandler(async (req, res) => {
   try {
-    const {rows: messages} = await db.query("SELECT * FROM messages WHERE chat = $1",[req.params.chatId]);
+    const {rows: messages} = await db.query(
+      `SELECT 
+        m.*, 
+        row_to_json(u) AS sender
+      FROM messages m
+      JOIN users u ON m.sender = u.id
+      WHERE m.chat = $1
+      ORDER BY m.created_at ASC`, 
+      [req.params.chatId]);
+
     res.json(messages);
   } catch (error) {
     res.status(400);
