@@ -135,7 +135,7 @@ const SignUp = () => {
 		<InputGroup>
 			<Input placeholder="Enter Your Password"
 			type={show ? "text": "Enter Password"}
-				onChange={(e) => setPassword(e.target.value)}/>
+				onChange={(e) => setPassword(e.target.value)} autoComplete="new-password"/>
 			<InputRightElement width="4.5rem">
 				<Button h="1.75rem" size="sm" onClick={handleClick}>{show ? "Hide" : "Show"}</Button>
 			
@@ -147,7 +147,7 @@ const SignUp = () => {
 		<InputGroup>
 			<Input placeholder="Confirm Password"
 			type={show ? "text": "password"}
-				onChange={(e) => setConfirmPassword(e.target.value)}/>
+				onChange={(e) => setConfirmPassword(e.target.value)} autoComplete="new-password"/>
 			<InputRightElement width="4.5rem">
 				<Button h="1.75rem" size="sm" onClick={handleClick}>{show ? "Hide" : "Show"}</Button>
 			

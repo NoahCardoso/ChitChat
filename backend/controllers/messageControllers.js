@@ -10,11 +10,10 @@ export const sendMessage = asyncHandler(async (req, res) => {
   }
 
   try {
-    const {rows} = await db.query("INSERT INTO messages (sender, content, chat) VALUES ($1, $2, $3) RETURNING id",[req.user.id, content, chatId]);
-    const id = rows[0].id;
-    console.log(id);
+    const {rows} = await db.query("INSERT INTO messages (sender, content, chat) VALUES ($1, $2, $3) RETURNING *",[req.user.id, content, chatId]);
+    const message = rows[0];
     //update chat with last message
-    const {rows: chat} = await db.query("UPDATE chats SET latestmessage = $1, sender = $2 WHERE id = $3 RETURNING *",[id, req.user.id, chatId]);
+    const {rows: chat} = await db.query("UPDATE chats SET latestmessage = $1, sender = $2 WHERE id = $3 RETURNING *",[message.id, req.user.id, chatId]);
     const userResult = await db.query(
       `SELECT u.*
        FROM users u
@@ -23,7 +22,11 @@ export const sendMessage = asyncHandler(async (req, res) => {
       [chatId]
     );
     res.status(200).json({
-      chat: chat[0],
+      chatname: chat.chatname,
+      isgroupchat: chat.isgroupchat,
+      groupadmin: chat.groupadmin,
+      latestmessage: message,
+      sender: req.user,
       users: userResult.rows,
     });
   } catch (error) {
@@ -31,4 +34,14 @@ export const sendMessage = asyncHandler(async (req, res) => {
     throw new Error(error.message);
   }
 
+});
+
+export const allMessages = asyncHandler(async (req, res) => {
+  try {
+    const {rows: messages} = await db.query("SELECT * FROM messages WHERE chat = $1",[req.params.chatId]);
+    res.json(messages);
+  } catch (error) {
+    res.status(400);
+    throw new Error(error.message);
+  }
 });
