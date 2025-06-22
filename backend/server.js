@@ -12,6 +12,9 @@ import passport from "passport";
 import cors from "cors";
 const app = express();
 const port = process.env.PORT || 5000;
+import { Server } from "socket.io";
+
+
 db.connect();
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -49,7 +52,40 @@ app.use(errorMiddleware.notFound);
 app.use(errorMiddleware.errorHandler);
 
 
-app.listen(port, () =>{
+const server = app.listen(port, () =>{
 	console.log(`server listening on port ${port}`);
 });
 
+const io = new Server(server, {
+  pingTimeout: 60000,
+  cors: {
+    origin: process.env.FRONTEND_PORT,
+    credentials: true,
+  }
+});
+
+io.on("connection", (socket) => {
+  console.log("connected to socket.io");
+
+  socket.on("setup", (userData) => {
+    socket.join(userData.id);
+    socket.emit("connected");
+  });
+
+  socket.on("join chat", (room) => {
+    socket.join(room);
+  });
+
+  socket.on("new message", (newMessageRecieved) => {
+    let chat = newMessageRecieved.chat;
+    console.log(chat);
+
+    if (!chat.users) return console.log("chat.users not defined");
+    
+    chat.users.forEach(user => {
+      if(user.id == newMessageRecieved.sender.id) return;
+
+      socket.in(user.id).emit("message recieved", newMessageRecieved);
+    });
+  });
+});

@@ -8,15 +8,47 @@ import UpdateGroupChatModal from "./extras/UpdateGroupChatModal";
 import axios from "axios";
 import "./styles.css";
 import ScrollableChat from "./ScrollableChat";
+import io from "socket.io-client";
+
+const ENDPOINT = process.env.BACKEND_PORT;
+let socket, selectedChatCompare;
 
 const SingleChat = ({ fetchAgain, setFetchAgain}) => {
-
+  const [socketConnected, setSocketConnected] = useState(false);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState();
+  // const [typing, setTyping] = useState(false);
+  // const [isTyping, setIsTyping] = useState()
 
   const { user, selectedChat, setSelectedChat } = ChatState();
   const toast = useToast();
+
+  useEffect(() => {
+    socket = io(ENDPOINT);
+    socket.emit("setup",user);
+    socket.on("connection", () => setSocketConnected(true));
+  },[]);
+
+  useEffect(() => {
+    fetchMessages();
+
+    selectedChatCompare = selectedChat;
+  }, [selectedChat]);
+
+  useEffect(() => {
+    
+    socket.on("message recieved", (newMessageRecieved) => {
+      
+      if(!selectedChatCompare || selectedChatCompare.id !== newMessageRecieved.chat.id){
+        // give
+      } else {
+        
+        setMessages([...messages, newMessageRecieved]);
+      }
+    });
+  });
+
 
   const fetchMessages = async () => {
     if(!selectedChat) return;
@@ -25,6 +57,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain}) => {
       const {data} = await axios.get(`/api/message/${selectedChat.id}`,{withCredentials: true});
       setMessages(data);
       setLoading(false);
+      socket.emit("join chat", selectedChat.id);
     } catch (error) {
       toast({
 				title: "Error Occured!",
@@ -40,15 +73,16 @@ const SingleChat = ({ fetchAgain, setFetchAgain}) => {
 
   };
 
-  const sendMessage = async (e) => {
-    if (e.key === "Enter" && newMessage) {
+  const sendMessage = async (event) => {
+    if (event.key === "Enter" && newMessage) {
       try {
         setNewMessage("");
         const {data} = await axios.post("/api/message", {
           content: newMessage,
           chatId: selectedChat.id,
         }, {headers : {"Content-Type" : "application/json", withCredentials: true}});
-        
+       
+        socket.emit("new message", data);
         setMessages([...messages, data]);
       } catch (error) {
         toast({
@@ -68,9 +102,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain}) => {
   };
 
 
-  useEffect(() => {
-    fetchMessages();
-  }, [selectedChat]);
+
 
   return (<>{selectedChat ? (
   <>
