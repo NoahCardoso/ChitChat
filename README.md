@@ -13,7 +13,7 @@ Uses Socket.io for real time communication and stores user details in encrypted 
 Clone the project
 
 ```bash
-  git clone https://github.com/piyush-eon/mern-chat-app
+  git clone https://github.com/NoahCardoso/ChitChat
 ```
 
 Go to the project directory
@@ -49,22 +49,22 @@ Start the Client
 # Features
 
 ### Authenticaton
-![](https://github.com/NoahCardoso/ChitChat/main/screenshots/login.PNG)
-![](https://github.com/NoahCardoso/ChitChat/main/screenshots/signup.PNG)
+![](https://raw.githubusercontent.com/NoahCardoso/ChitChat/main/screenshots/login.png)
+![](https://raw.githubusercontent.com/NoahCardoso/ChitChat/main/screenshots/signup.png)
 ### Real Time Chatting with Typing indicators
-![](https://github.com/NoahCardoso/ChitChat/main/screenshots/typing.PNG)
+![](https://raw.githubusercontent.com/NoahCardoso/ChitChat/main/screenshots/typing.png)
 ### One to One chat
-![](https://github.com/NoahCardoso/ChitChat/main/screenshots/onetoone.PNG)
+![](https://raw.githubusercontent.com/NoahCardoso/ChitChat/main/screenshots/onetoone.png)
 ### Search Users
-![](https://github.com/NoahCardoso/ChitChat/main/screenshots/searchusers.PNG)
+![](https://raw.githubusercontent.com/NoahCardoso/ChitChat/main/screenshots/searchusers.png)
 ### Create Group Chats
-![](https://github.com/NoahCardoso/ChitChat/main/screenshots/creategc.PNG)
+![](https://raw.githubusercontent.com/NoahCardoso/ChitChat/main/screenshots/creategc.png)
 ### Notifications 
-![](https://github.com/NoahCardoso/ChitChat/main/screenshots/notif.PNG)
+![](https://raw.githubusercontent.com/NoahCardoso/ChitChat/main/screenshots/notif.png)
 ### Add or Remove users from group
-![](https://github.com/NoahCardoso/ChitChat/main/screenshots/addrm.PNG)
+![](https://raw.githubusercontent.com/NoahCardoso/ChitChat/main/screenshots/addrm.png)
 ### View Other user Profile
-![](https://github.com/NoahCardoso/ChitChat/main/screenshots/viewprofile.PNG)
+![](https://raw.githubusercontent.com/NoahCardoso/ChitChat/main/screenshots/viewprofile.png)
 ## Made By
 
-- [@NoahCardoso](https://github.com/NoahCardoso)
+- [@NoahCardoso](https://raw.githubusercontent.com/NoahCardoso)
