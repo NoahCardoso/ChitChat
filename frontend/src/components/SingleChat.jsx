@@ -23,7 +23,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain}) => {
   const [typing, setTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
 
-  const { user, selectedChat, setSelectedChat } = ChatState();
+  const { user, selectedChat, setSelectedChat, notification, setNotification } = ChatState();
   const toast = useToast();
 
   const defaultOptions = {
@@ -54,7 +54,10 @@ const SingleChat = ({ fetchAgain, setFetchAgain}) => {
     socket.on("message recieved", (newMessageRecieved) => {
       
       if(!selectedChatCompare || selectedChatCompare.id !== newMessageRecieved.chat.id){
-        // give
+        if(!notification.includes(newMessageRecieved)){
+          setNotification([newMessageRecieved, ...notification]);
+          setFetchAgain(!fetchAgain);
+        }
       } else {
         
         setMessages([...messages, newMessageRecieved]);
@@ -156,7 +159,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain}) => {
         
       />
       {!selectedChat.isgroupchat ? (
-        <>{getSender(user,selectedChat.users)}
+        <>{ console.log(selectedChat)}{getSender(user,selectedChat.users)}
         <ProfileModal user={getSenderFull(user,selectedChat.users)}/>
         </>) : 
       (<>{selectedChat.chatname.toUpperCase()}

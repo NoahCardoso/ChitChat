@@ -79,7 +79,8 @@ const MyChats = ({ fetchAgain }) => {
       borderRadius="lg"
       overflowY="hidden"
     >
-      {chats ? (<Stack overflowY="scroll">{chats.map((chat) => (<Box
+      {chats ? (<Stack overflowY="scroll">{chats.map((chat) => (
+      <Box
         onClick={() => setSelectedChat(chat)}
         cursor="pointer"
         bg={selectedChat === chat ? "#38B2AC" : "#E8E8E8"}
@@ -91,8 +92,17 @@ const MyChats = ({ fetchAgain }) => {
       >
         <Text>
           {!chat.isgroupchat?(getSender(loggedzUser, chat.users)):(chat.chatname)}
+          
         </Text>
-      </Box>))}</Stack>) : (<ChatLoading/>)}
+        {/* <Text style={{ fontSize: '12px' }}>
+          {
+            chat?.latestmessage?.content && chat?.latestmessage?.sender?.name
+            ? `${chat.latestmessage.sender.name}: ${chat.latestmessage.content}`
+            : "No messages yet"
+          }
+        </Text> */}
+      </Box>
+      ))}</Stack>) : (<ChatLoading/>)}
     </Box>
   </Box>
   )

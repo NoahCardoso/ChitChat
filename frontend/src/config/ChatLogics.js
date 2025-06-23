@@ -1,4 +1,8 @@
 export const getSender = (loggedUser, users) => {
+  if (!users || users.length < 2) {
+    console.log("ERROR"+users);
+  };
+  
   return users[0].id === loggedUser.id ? users[1].name : users[0].name;
 };
 

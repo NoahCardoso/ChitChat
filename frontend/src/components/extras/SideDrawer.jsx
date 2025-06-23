@@ -14,6 +14,8 @@ import { useHistory } from 'react-router-dom';
 import axios from "axios";
 import ChatLoading from '../ChatLoading';
 import UserListItem from '../UserAvatar/UserListItem';
+import { getSender } from '../../config/ChatLogics';
+import NotificationBadge, { Effect } from "react-notification-badge";
 
 const SideDrawer = () => {
 	
@@ -23,7 +25,7 @@ const SideDrawer = () => {
 	const [loading, setLoading] = useState(false);
 	const [loadingChat, setLoadingChat] = useState();
 	const { isOpen, onOpen, onClose } = useDisclosure();
-	const {user, setSelectedChat, chats, setChats} = ChatState();
+	const {user, setSelectedChat, chats, setChats, notification, setNotification} = ChatState();
 
 	const history = useHistory();
 	const logoutHandler = () => {
@@ -34,7 +36,7 @@ const SideDrawer = () => {
 	const toast = useToast();
 
 	const handleSearch= async(query) => {
-		setSearch(query);
+
 		if (!query) {
 			toast({
 				title: "Please Fill all the Feilds!",
@@ -45,11 +47,13 @@ const SideDrawer = () => {
 			});
 			return;
 		}
+
 		try {
 			setLoading(true);
 			const { data } = await axios.get(`/api/user?search=${search}`, {
 				withCredentials: true,
 			});
+
 			setSearchResult(data);
 			setLoading(false);
 			
@@ -63,7 +67,7 @@ const SideDrawer = () => {
 				isClosable: true,
 				position: "bottom-left",
 			});
-			console.log(err);
+
 		}
 	};
 
@@ -123,8 +127,25 @@ const SideDrawer = () => {
 		<div>
 			<Menu>
 				<MenuButton p={1}>
+					<NotificationBadge
+						count={notification.length}
+						effect={Effect.SCALE}
+					/>
 					<BellIcon fontSize="2xl" m={1}/>
 				</MenuButton>
+				<MenuList pl={2}>
+					{!notification.length && "No New Messages"}
+					{notification.map(note => (
+						<MenuItem key={note.id} onClick={() => {
+							setSelectedChat(note.chat);
+							setNotification(notification.filter(n => n !== note));
+						}}>
+							{note.chat.isgroupchat
+							? `New Message in ${note.chat.chatname}`
+							: `New Message from ${getSender(user,note.chat.users)}`}
+						</MenuItem>
+					))}
+				</MenuList>
 			</Menu>
 			<Menu>
 				<MenuButton as={Button} rightIcon={<ChevronDownIcon/>}>
