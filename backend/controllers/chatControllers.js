@@ -10,6 +10,7 @@ export const accessChat = asyncHandler(async (req, res) => {
     return res.sendStatus(400);
   }
 
+  // 1. Try to find existing one-to-one chat
   const possibleChats = await db.query(
     `SELECT c.*
      FROM chats c
@@ -28,6 +29,7 @@ export const accessChat = asyncHandler(async (req, res) => {
   if (possibleChats.rows.length > 0) {
     chat = possibleChats.rows[0];
   } else {
+    // 2. Create new chat
     const newChatResult = await db.query(
       "INSERT INTO chats (chatname, isgroupchat, groupadmin) VALUES ($1, $2, $3) RETURNING *",
       ["sender", false, req.user.id]
@@ -39,40 +41,47 @@ export const accessChat = asyncHandler(async (req, res) => {
     await db.query("INSERT INTO chat_users (chat_id, user_id) VALUES ($1, $2)", [chat.id, userId]);
   }
 
-  // Get users in chat
+  // 3. Get users in chat
   const { rows: users } = await db.query(
-    `SELECT u.id, u.name, u.email
+    `SELECT u.id, u.name, u.email, u.pic
      FROM users u
      JOIN chat_users cu ON cu.user_id = u.id
      WHERE cu.chat_id = $1`,
     [chat.id]
   );
 
-  // Get latest message + sender if exists
+  // 4. Get latest message + sender (if exists)
   let latestMessage = null;
+  let sender = null;
 
-  if (chatRows[0].latestmessage) {
+  if (chat.latestmessage) {
     const { rows: latestMsgRows } = await db.query(
-      `SELECT m.id, m.content, u.id AS sender_id, u.name AS sender_name
+      `SELECT m.id, m.content, m.sender, u.* AS sender
        FROM messages m
        JOIN users u ON m.sender = u.id
        WHERE m.id = $1`,
-      [chatRows[0].latestmessage]
+      [chat.latestmessage]
     );
+
     if (latestMsgRows.length > 0) {
       latestMessage = {
-        ...latestMsgRows[0],
+        id: latestMsgRows[0].id,
+        content: latestMsgRows[0].content,
+        sender: latestMsgRows[0].sender,
       };
-      const {rows: senderRows} = await db.query("SELECT * FROM users WHERE id = $1",[latestMsgRows[0].sender]);
+      sender = latestMsgRows[0].sender
     }
   }
+
+  // 5. Return full chat object
   res.status(200).json({
     ...chat,
     users,
     latestmessage: latestMessage,
-    sender: senderRows[0],
+    sender,
   });
 });
+
 
 
 export const fetchChats = asyncHandler(async (req, res) => {
@@ -88,6 +97,7 @@ export const fetchChats = asyncHandler(async (req, res) => {
       u.id AS user_id,
       u.name,
       u.email,
+      u.pic,
       m.id AS message_id,
       m.content AS message_content,
       mu.id AS message_sender_id,
@@ -123,6 +133,7 @@ export const fetchChats = asyncHandler(async (req, res) => {
               sender: {
                 id: row.message_sender_id,
                 name: row.message_sender_name,
+                pic: row.pic,
               },
             }
           : null,
@@ -135,6 +146,7 @@ export const fetchChats = asyncHandler(async (req, res) => {
         id: row.user_id,
         name: row.name,
         email: row.email,
+        pic: row.pic,
       });
     }
   }
@@ -151,7 +163,7 @@ export const fetchChats = asyncHandler(async (req, res) => {
   let sendersMap = {};
   if (senderIds.length > 0) {
     const { rows: senderRows } = await db.query(
-      "SELECT id, name, email FROM users WHERE id = ANY($1::int[])",
+      "SELECT * FROM users WHERE id = ANY($1::int[])",
       [senderIds]
     );
     for (const sender of senderRows) {
@@ -192,17 +204,10 @@ export const createGroupChat = asyncHandler(async (req, res) => {
 
   const fullUsers = await Promise.all(
     users.map(async (user) => {
-      const { rows } = await db.query("SELECT id, name, email FROM users WHERE id = $1", [user]);
+      const { rows } = await db.query("SELECT * FROM users WHERE id = $1", [user]);
       return rows[0];
     })
   );
-
-  // Get full sender
-  const { rows: senderRows } = await db.query(
-    "SELECT id, name, email FROM users WHERE id = $1",
-    [req.user.id]
-  );
-  const sender = senderRows[0];
 
   res.status(200).json({
     
@@ -212,7 +217,7 @@ export const createGroupChat = asyncHandler(async (req, res) => {
     groupadmin: chat.groupadmin,
     updated_at: chat.updated_at,
     created_at: chat.created_at,
-    sender,
+    sender: null,
     users: fullUsers,
     latestmessage: null,
   });
@@ -225,7 +230,7 @@ export const renameGroup = asyncHandler(async (req, res) => {
 
   // Get users of chat
   const { rows: userResult } = await db.query(
-    `SELECT u.id, u.name, u.email
+    `SELECT *
      FROM users u
      INNER JOIN chat_users cu ON cu.user_id = u.id
      WHERE cu.chat_id = $1`,
@@ -237,7 +242,7 @@ export const renameGroup = asyncHandler(async (req, res) => {
   let sender = null;
   if (chatRows[0].latestmessage) {
     const { rows: latestMsgRows } = await db.query(
-      `SELECT m.id, m.content, u.id AS sender_id, u.name AS sender_name
+      `SELECT m.id, m.content, u.* AS sender
        FROM messages m
        JOIN users u ON m.sender = u.id
        WHERE m.id = $1`,
@@ -247,7 +252,7 @@ export const renameGroup = asyncHandler(async (req, res) => {
       latestMessage = {
         ...latestMsgRows[0],
       };
-      const {rows: senderRows} = await db.query("SELECT * FROM users WHERE id = $1",[latestMsgRows[0].sender]);
+      sender = latestMsgRows[0].sender;
     }
   }
 
@@ -255,7 +260,7 @@ export const renameGroup = asyncHandler(async (req, res) => {
     ...chatRows[0],
     users: userResult,
     latestmessage: latestMessage,
-    sender: senderRows[0],
+    sender,
   });
 });
 
@@ -265,7 +270,7 @@ export const addToGroup = asyncHandler(async (req, res) => {
 
   const { rows: chatRows } = await db.query("SELECT * FROM chats WHERE id = $1", [chatId]);
   const { rows: userResult } = await db.query(
-    `SELECT u.id, u.name, u.email
+    `SELECT *
      FROM users u
      INNER JOIN chat_users cu ON cu.user_id = u.id
      WHERE cu.chat_id = $1`,
@@ -277,7 +282,7 @@ export const addToGroup = asyncHandler(async (req, res) => {
   let sender = null;
   if (chatRows[0].latestmessage) {
     const { rows: latestMsgRows } = await db.query(
-      `SELECT m.id, m.content, u.id AS sender_id, u.name AS sender_name
+      `SELECT m.id, m.content, u.* AS sender
        FROM messages m
        JOIN users u ON m.sender = u.id
        WHERE m.id = $1`,
@@ -287,7 +292,7 @@ export const addToGroup = asyncHandler(async (req, res) => {
       latestMessage = {
         ...latestMsgRows[0],
       };
-      const {rows: senderRows} = await db.query("SELECT * FROM users WHERE id = $1",[latestMsgRows[0].sender]);
+      sender = latestMsgRows[0].sender;
     }
   }
 
@@ -295,7 +300,7 @@ export const addToGroup = asyncHandler(async (req, res) => {
     ...chatRows[0],
     users: userResult,
     latestmessage: latestMessage,
-    sender: senderRows[0]
+    sender,
   });
 });
 
@@ -306,7 +311,7 @@ export const removeFromGroup = asyncHandler(async (req, res) => {
 
   const { rows: chatRows } = await db.query("SELECT * FROM chats WHERE id = $1", [chatId]);
   const { rows: userResult } = await db.query(
-    `SELECT u.id, u.name, u.email
+    `SELECT *
      FROM users u
      INNER JOIN chat_users cu ON cu.user_id = u.id
      WHERE cu.chat_id = $1`,
@@ -318,7 +323,7 @@ export const removeFromGroup = asyncHandler(async (req, res) => {
   let sender = null;
   if (chatRows[0].latestmessage) {
     const { rows: latestMsgRows } = await db.query(
-      `SELECT m.id, m.content, u.id AS sender_id, u.name AS sender_name
+      `SELECT m.id, m.content, u.* AS sender
        FROM messages m
        JOIN users u ON m.sender = u.id
        WHERE m.id = $1`,
@@ -328,7 +333,7 @@ export const removeFromGroup = asyncHandler(async (req, res) => {
       latestMessage = {
         ...latestMsgRows[0],
       };
-      const {rows: senderRows} = await db.query("SELECT * FROM users WHERE id = $1",[latestMsgRows[0].sender]);
+      sender = latestMsgRows[0].sender
     }
   }
 
@@ -336,6 +341,6 @@ export const removeFromGroup = asyncHandler(async (req, res) => {
     ...chatRows[0],
     users: userResult,
     latestmessage: latestMessage,
-    sender: senderRows[0]
+    sender,
   });
 });

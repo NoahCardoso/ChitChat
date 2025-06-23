@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, IconButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useDisclosure, Modal, ModalBody, ModalCloseButton, Image, Text } from "@chakra-ui/react";
+import { Button, IconButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useDisclosure, Modal, ModalBody, ModalCloseButton, Image, Text, Avatar } from "@chakra-ui/react";
 import { ViewIcon } from "@chakra-ui/icons";
 
 
@@ -18,9 +18,10 @@ const ProfileModal = ({user, children}) => {
 					justifyContent="center"
 				>
 					{user.name}</ModalHeader>
+					{console.log(user)}
 				<ModalCloseButton />
 				<ModalBody display="flex" flexDir="column" alignItems="center" justifyContent="space-between">
-					<Image borderRadius="full" boxSize="150px" src={user.pic} alt={user.name} />
+					<Avatar borderRadius="full" boxSize="150px" src={user.pic} alt={user.name} />
 					<Text fontSize={{ base: "28px", md: "30px"}}>Email: {user.email}</Text>
 				</ModalBody>
 
